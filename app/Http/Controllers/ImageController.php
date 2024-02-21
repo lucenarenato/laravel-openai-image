@@ -68,7 +68,40 @@ class ImageController extends Controller
         // Return the image as a response
         /*return response($imageContent)
             ->header('Content-Type', $imageMimeType);*/
-
+        self::saveImage($url);
         return view('image.show', ['imageUrl' => $url]);
+    }
+
+    // Create a function that saves the image url to storage and returns the image path
+    public function saveImage($imageUrl)
+    {
+        // Check if the URL is valid
+        if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+            throw new \InvalidArgumentException('Invalid URL provided');
+        }
+
+        // Extract file name from the URL
+        $fileName = basename($imageUrl);
+        $fileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $fileName); // Replace invalid characters with underscores
+
+        // Generate a unique filename to avoid conflicts
+        $uniqueFileName = md5(uniqid()) . '_' . 'images';
+
+        // Determine the path to save the image
+        $imagePath = storage_path('app/images/' . $uniqueFileName . '.png');
+
+        // Attempt to download and save the image
+        $imageData = file_get_contents($imageUrl);
+        if ($imageData === false) {
+            throw new \RuntimeException('Failed to download the image');
+        }
+
+        // Save the image data to storage
+        if (file_put_contents($imagePath, $imageData) === false) {
+            throw new \RuntimeException('Failed to save the image');
+        }
+
+        // Return the path to the saved image
+        return $imagePath;
     }
 }
