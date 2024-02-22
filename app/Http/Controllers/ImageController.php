@@ -84,8 +84,10 @@ class ImageController extends Controller
         $fileName = basename($imageUrl);
         $fileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $fileName); // Replace invalid characters with underscores
 
+        $sha256 = hash('sha256', rand(1, 900000000) . date('YmdHis'));
+
         // Generate a unique filename to avoid conflicts
-        $uniqueFileName = md5(uniqid()) . '_' . 'images';
+        $uniqueFileName = md5(uniqid()) . '_' . $sha256;
 
         // Determine the path to save the image
         $imagePath = storage_path('app/images/' . $uniqueFileName . '.png');
